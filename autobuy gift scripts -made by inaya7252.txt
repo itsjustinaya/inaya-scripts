@@ -1,0 +1,22 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("autobuy gifts -inaya7252", "DarkTheme")
+-- Credits Section
+local Tab = Window:NewTab("home")
+local home = Tab:NewSection("credits:")
+home:NewLabel("autobuy: made by silentben8x")
+home:NewLabel("lua learning: zeen")
+home:NewLabel("autobuy gift script: made by inaya7252")
+-- Autobuy Section
+local Tab = Window:NewTab("autobuy")
+local autobuy = Tab:NewSection("autobuy:")
+autobuy:NewDropdown("gift:", "DropdownInf", {"2023CGift_Wobble", "2023CGift_Green", "2023CGift_Pixelated","2023CGift_LT2","2023CGift_Dice", "2022CGift_Heavy"},function(currentOption)
+    getgenv().Item = currentOption
+end)
+
+autobuy:NewSlider("Amount", "how many gifts you want to buy", 100, 0, function(s)
+    getgenv().Amount = s
+end)
+
+autobuy:NewButton("autobuy"), "autobuy what you selected", function()
+HttpGet("loadstring(game:HttpGet("https://raw.githubusercontent.com/Aurora-2004/PuplicProjects/main/AutoBuy"))()
+end)
