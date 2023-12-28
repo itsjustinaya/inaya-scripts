@@ -1,0 +1,266 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("autobuy gifts -inaya7252", "DarkTheme")
+
+-- Credits Section
+local Tab = Window:NewTab("home")
+local home = Tab:NewSection("credits:")
+home:NewLabel("autobuy: made by silentben8x")
+home:NewLabel("lua learning: zeen")
+home:NewLabel("autobuy gift script: made by inaya7252")
+
+-- Autobuy Section
+local Tab = Window:NewTab("autobuy")
+local autobuy = Tab:NewSection("autobuy status: waiting..")
+autobuy:NewDropdown("gift:", "DropdownInf", {
+    "2023CGift_Dice",
+    "2023CGift_Green",
+    "2023CGift_LT2",
+    "2023CGift_Mint",
+    "2023CGift_Pixelated",
+    "2023CGift_Pixelatedo",
+    "2023CGift_Wobble",
+    "ApplePie",
+    "Axe1",
+    "Axe2",
+    "Axe3",
+    "BagOfsand",
+    "BasicHatchet",
+    "Bed1",
+    "Bed2",
+    "Button0",
+    "Cabinet1",
+    "Cabinet1CornerTight",
+    "Cabinet1CornerWide",
+    "Cabinet1Thin",
+    "CanOfCranberry",
+    "CanOfWorms",
+    "Chair1",
+    "ChopSaw",
+    "ClockSwitch",
+    "CoalLump",
+    "Cocoa",
+    "Cone",
+    "ConveyorFunnel",
+    "ConveyorSupports",
+    "ConveyorSwitch",
+    "Cornucopia",
+    "CounterTop1",
+    "CounterTop1Sink",
+    "CounterTop1Thin",
+    "Dishwasher",
+    "Door1",
+    "Door2",
+    "Door3",
+    "Duck",
+    "Dynamite",
+    "EndTimesAxe",
+    "Eye1",
+    "FerryPotterDS",
+    "FireAxe",
+    "FireworksLauncher",
+    "Floor1",
+    "Floor1Large",
+    "Floor1Small",
+    "Floor1Tiny",
+    "Floor2",
+    "Floor2Large",
+    "Floor2Small",
+    "Floor2Tiny",
+    "FloorLamp1",
+    "GateAND",
+    "GateNAND",
+    "GateNOR",
+    "GateNOT",
+    "GateOR",
+    "GateXNOR",
+    "GateXOR",
+    "GlassDoor1",
+    "GlassPane1",
+    "GlassPane2",
+    "GlassPane3",
+    "GlassPane4",
+    "GreenBall",
+    "HamLeg",
+    "Hatch",
+    "HatchetBook",
+    "IceAxe",
+    "IceCube",
+    "IcicleWireAmber",
+    "IcicleWireBlue",
+    "IcicleWireCandy",
+    "IcicleWireHalloween",
+    "IcicleWireMagenta",
+    "IcicleWireRed",
+    "LT2Book",
+    "Ladder1",
+    "Lamp1",
+    "Laser",
+    "LaserReciver",
+    "Lever0",
+    "LightBulb",
+    "LimeBall",
+    "LogSweeper",
+    "LumberBook",
+    "ManyAxe",
+    "NeonWireBlue",
+    "NeonWireCyan",
+    "NeonWireGreen",
+    "NeonWireOrange",
+    "NeonWireRed",
+    "NeonWireViolet",
+    "NeonWireWhite",
+    "NeonWireYellow",
+    "OrangeBall",
+    "Painting1",
+    "Painting10",
+    "Painting11",
+    "Painting12",
+    "Painting2",
+    "Painting3",
+    "Painting4",
+    "Painting5",
+    "Painting6",
+    "Painting7",
+    "Painting8",
+    "Painting9",
+    "Pickup1",
+    "Plate",
+    "PlumBall",
+    "Post",
+    "PressurePlate",
+    "Refridgerator",
+    "Rukiryaxe",
+    "SRLatch",
+    "Sawmill",
+    "Sawmill2",
+    "Sawmill3",
+    "Sawmill4",
+    "Sawmill4L",
+    "Scoobis",
+    "Seat_Armchair",
+    "Seat_Couch",
+    "Seat_Loveseat",
+    "SignalDelay",
+    "SignalSustain",
+    "SilverAxe",
+    "Skull",
+    "Sleigh",
+    "SmallTrailer",
+    "Snowball",
+    "Snowmobile",
+    "SpareTire",
+    "SparkleTurkey",
+    "Spork",
+    "Stair1",
+    "Stair2",
+    "Stove",
+    "StraightConveyor",
+    "StraightSwitchConveyorLeft",
+    "StraightSwitchConveyorRight",
+    "Table1",
+    "Table2",
+    "TealBall",
+    "TightTurnConveyor",
+    "TightTurnConveyorSupports",
+    "TiltConveyor",
+    "Toboggan",
+    "Toilet",
+    "ToiletGold",
+    "Trailer2",
+    "Turkey",
+    "Turkey2",
+    "Turkey3",
+    "Turkey4",
+    "Turkey5",
+    "Turkey6",
+    "TurkeyLeg",
+    "UtilityTruck",
+    "UtilityTruck2",
+    "Wall1",
+    "WallCorner",
+    "Wall1Short",
+    "Wall1ShortCorner",
+    "Wall1ShortThin",
+    "Wall1Thin",
+    "Wall2",
+    "Wall2Corner",
+    "Wall2Short",
+    "Wall2ShortCorner",
+    "Wall2ShortThin",
+    "Wall2Tall",
+    "Wall2TallCorner",
+    "Wall2TallThin",
+    "Wall2Thin",
+    "Wall3",
+    "Wall3Corner",
+    "Wall3Tall",
+    "Wall3TallCorner",
+    "Wall3TallThin",
+    "Wall3Thin",
+    "WallLight1",
+    "WallLight2",
+    "Wedge1",
+    "Wedge10",
+    "Wedge10_Thin",
+    "Wedge1_Thin",
+    "Wedge2",
+    "Wedge2_Thin",
+    "Wedge3",
+    "Wedge3_Thin",
+    "Wedge4",
+    "Wedge4_Thin",
+    "Wedge5",
+    "Wedge5_Thin",
+    "Wedge6",
+    "Wedge6_Thin",
+    "Wedge7",
+    "Wedge7_Thin",
+    "Wedge8",
+    "Wedge8_Thin",
+    "Wedge9",
+    "Wedge9_Thin"},function(currentOption)
+    getgenv().Item = currentOption
+end)
+
+autobuy:NewSlider("Amount", "how many gifts you want to buy", 100, 0, function(s)
+    getgenv().Amount = s
+end)
+
+autobuy:NewButton("Autobuy", "Autobuy what you selected", function()
+    autobuy:UpdateSection("autobuy status: buying")
+    wait()
+    local success, error = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Aurora-2004/PuplicProjects/main/AutoBuy"))()
+    end)
+
+    if not success then
+        warn("Error loading Autobuy script:", error)
+    end
+    autobuy:UpdateSection("autobuy status: waiting..")
+end)
+local AutobuyToggle = false
+local AutobuyButton
+player:NewButton("Toggle Autobuy", "Start/Stop Autobuy process", function()
+    AutobuyToggle = not AutobuyToggle
+    player:SetText("Autobuy: " .. (AutobuyToggle and "ON" or "OFF"))
+
+    if AutobuyToggle then
+        -- Execute code to start the Autobuy process
+        print("Autobuy started!")
+    else
+        -- Execute code to stop the Autobuy process
+        print("Autobuy stopped!")
+    end
+end, function(button)
+    AutobuyButton = button
+end)
+-- Misc Section
+local Tab = Window:NewTab("misc")
+local misc = Tab:NewSection("misc:")
+misc:NewButton("Butterhub", "Loads Butterhub", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/Butterisgood/Butter/main/Root2.lua'))("")
+end)
+
+misc:NewKeybind("Toggle GUI", "Choose the button to toggle the GUI", Enum.KeyCode.F, function()
+    Library:ToggleUI()
+end)
