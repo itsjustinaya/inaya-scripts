@@ -1,19 +1,38 @@
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("lt2 script -made by inaya7252", "DarkTheme")
+-- clipboard system
+local function CopyToClipboard(text)
+    setclipboard(text)
+    print("Copied to clipboard: " .. text)
+end
+-- notif system
+local function CreateNotification(message, iconId)
+    local notification = game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Notification",
+        Text = message,
+        Icon = iconId,
+        Duration = 2
+    })
+end
 -- Credits Section
 local Tab = Window:NewTab("home")
 local home = Tab:NewSection("credits:")
 home:NewLabel("autobuy: made by silentben8x")
-home:NewLabel("lua learning: zeen")
+home:NewLabel("lua teacher: zeen")
 home:NewLabel("autobuy gift script: made by inaya7252")
+local customPhrase = "https://discord.gg/68J3NmAJQK"
+home:NewButton("copy discord", "Copys the script server into your clipboard", function()
+    CopyToClipboard(customPhrase)
+    local customIconId = "rbxassetid://128737233"
+    CreateNotification("Successfully copied inaya's Discord server link to your clipboard!", customIconId)
+end)
 local Tab = Window:NewTab("player")
 local player = Tab:NewSection("player:")
 local Player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local Mouse = Player:GetMouse()
 local TeleportEnabled = false
-
 local function Teleport(position)
     -- teleport
     Player.Character:SetPrimaryPartCFrame(CFrame.new(position))
@@ -30,7 +49,7 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 -- Autobuy Section
 local Tab = Window:NewTab("autobuy")
-local autobuy = Tab:NewSection("autobuy status: waiting..")
+local autobuy = Tab:NewSection("autobuy:")
 autobuy:NewDropdown("gift:", "DropdownInf", {
     "2023CGift_Dice",
     "2023CGift_Green",
