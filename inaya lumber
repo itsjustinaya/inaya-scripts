@@ -29,12 +29,59 @@ home:NewButton("copy discord", "Copys the script server into your clipboard", fu
 end)
 local Tab = Window:NewTab("player")
 local player = Tab:NewSection("player:")
+player:NewSlider("jump power", "adjust your characters jump power", 500, 50, function(jump)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = jump
+end)
+    local Player = game.Players.LocalPlayer
+    local Mouse = Player:GetMouse()
+    local UserInputService = game:GetService("UserInputService")
+    
+    local toggle = false
+    
+    local function onKeyPress(input)
+        if input.KeyCode == Enum.KeyCode.Space and toggle then
+            Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        end
+    end
+    
+    UserInputService.InputBegan:Connect(onKeyPress)
+    
+    local Section = {} 
+    local function ToggleFunction(state)
+        toggle = state
+        if toggle then
+            print("Toggle On")
+        else
+            print("Toggle Off")
+        end
+    end
+    
+    player:NewToggle("infinity jump", "jump high!", ToggleFunction)
+getgenv().NoClipEnabled = false
+
+function NoClip(NoClipVal)
+    if not NoClipVal then
+        Clipping:Disconnect()
+    else
+        Clipping = game:GetService("RunService").Stepped:Connect(function()
+            for i, v in next, game.Players.LocalPlayer.Character:GetChildren() do
+                if v:IsA("Part") or v:IsA("BasePart") then
+                    v.CanCollide = false
+                end
+            end
+        end)
+    end
+end
+player:NewToggle("noclip", "toggle on and off noclip", function(enabled)
+    getgenv().NoClipEnabled = enabled
+    NoClip(enabled)
+end)
+
 local Player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local Mouse = Player:GetMouse()
 local TeleportEnabled = false
 local function Teleport(position)
-    -- teleport
     Player.Character:SetPrimaryPartCFrame(CFrame.new(position))
 end
 
@@ -47,10 +94,91 @@ UserInputService.InputBegan:Connect(function(input)
         Teleport(Mouse.Hit.Position)
     end
 end)
--- Autobuy Section
+-- world section
+local Tab = Window:NewTab("world")
+local world = Tab:NewSection("world:")
+local walkOnWaterToggle = world:NewToggle("walk on water", "walk on water", function(swater)
+    WalkOnWater(swater)
+end)
+function WalkOnWater(swater)
+    for i, v in next, game:GetService("Workspace").Water:GetChildren() do
+        if v.Name == "Water" then
+            v.CanCollide = swater
+        end
+    end
+end
+local RemoveWaterToggle = world:NewToggle("remove water", "removes the water", function(Rwater)
+    for _, v in ipairs(game:GetService("Workspace").Water:GetChildren()) do
+        if v:IsA("Part") and v.Name == "Water" then
+            if not Rwater then
+                v.Transparency = 0
+            else
+                v.Transparency = 1
+            end
+        end
+    end
+end)
+-- slot section
+-- teleport section
+local Tab = Window:NewTab("teleports")
+local teleport = Tab:NewSection("teleports:")
+local teleportLocations = {
+    ["Wood Rus"] = Vector3.new(257, 3, 57),
+    ["Land Store"] = Vector3.new(249, 3, -99),
+    ["Fancy Furnishings"] = Vector3.new(491, 3, -1709),
+    ["Boxed Cars"] = Vector3.new(510, 3, -1470),
+    ["Bobs Shack"] = Vector3.new(255, 8, -2542),
+    ["Links Logic"] = Vector3.new(4609, 7, -775),
+    ["Fine Arts Shop"] = Vector3.new(5211, -166, 720),
+    ["Fire Tower"] = Vector3.new(1527, 355, 3263),
+    ["Shrine Of Sight"] = Vector3.new(-1339, 226, 707),
+    ["Strange Man"] = Vector3.new(1068, 17, 1137),
+}
+
+local selectedLocation = nil
+
+local dropdown = teleport:NewDropdown("insert location:", "teleports you to the chosen place", {
+    "Wood Rus",
+    "Land Store",
+    "Fancy Furnishings",
+    "Boxed Cars",
+    "Bobs Shack",
+    "Links Logic",
+    "Fine Arts Shop",
+    "Fire Tower",
+    "Shrine Of Sight",
+    "Strange Man",
+}, function(currentOption)
+    selectedLocation = currentOption
+
+    if selectedLocation then
+        local targetPosition = teleportLocations[selectedLocation]
+
+        local success, error = pcall(function()
+            game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
+        end)
+        if not success then
+            warn("Error teleporting:", error)
+        end
+    end
+end)
+local playerToTeleportTextBox = teleport:NewTextBox("insert Player:", "Teleport to the specified player", function(playerName)
+    local player = game.Players:FindFirstChild(playerName)
+    if player then
+        local character = player.Character
+        if character then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(humanoidRootPart.Position))
+            end
+        end
+    else
+        game.ReplicatedStorage.Notices.SendUserNotice:Fire("Player not found, please insert the players roblox name. NOT the display name.")
+    end
+end)
 local Tab = Window:NewTab("autobuy")
 local autobuy = Tab:NewSection("autobuy:")
-autobuy:NewDropdown("gift:", "DropdownInf", {
+autobuy:NewDropdown("insert item:", "DropdownInf", {
     "2023CGift_Dice",
     "2023CGift_Green",
     "2023CGift_LT2",
@@ -76,9 +204,6 @@ autobuy:NewDropdown("gift:", "DropdownInf", {
     "Chair1",
     "ChopSaw",
     "ClockSwitch",
-    "CoalLump",
-    "Cocoa",
-    "Cone",
     "ConveyorFunnel",
     "ConveyorSupports",
     "ConveyorSwitch",
@@ -92,7 +217,6 @@ autobuy:NewDropdown("gift:", "DropdownInf", {
     "Door3",
     "Dynamite",
     "FerryPotterDS",
-    "FireAxe",
     "FireworksLauncher",
     "Floor1",
     "Floor1Large",
@@ -115,29 +239,20 @@ autobuy:NewDropdown("gift:", "DropdownInf", {
     "GlassPane2",
     "GlassPane3",
     "GlassPane4",
-    "GreenBall",
-    "HamLeg",
     "Hatch",
-    "HatchetBook",
-    "IceAxe",
-    "IceCube",
     "IcicleWireAmber",
     "IcicleWireBlue",
     "IcicleWireCandy",
     "IcicleWireHalloween",
     "IcicleWireMagenta",
     "IcicleWireRed",
-    "LT2Book",
     "Ladder1",
     "Lamp1",
     "Laser",
     "LaserReciver",
     "Lever0",
     "LightBulb",
-    "LimeBall",
     "LogSweeper",
-    "LumberBook",
-    "ManyAxe",
     "NeonWireBlue",
     "NeonWireCyan",
     "NeonWireGreen",
@@ -160,7 +275,6 @@ autobuy:NewDropdown("gift:", "DropdownInf", {
     "Painting9",
     "Pickup1",
     "Plate",
-    "PlumBall",
     "Post",
     "PressurePlate",
     "Refridgerator",
@@ -171,21 +285,13 @@ autobuy:NewDropdown("gift:", "DropdownInf", {
     "Sawmill3",
     "Sawmill4",
     "Sawmill4L",
-    "Scoobis",
     "Seat_Armchair",
     "Seat_Couch",
     "Seat_Loveseat",
     "SignalDelay",
     "SignalSustain",
     "SilverAxe",
-    "Skull",
-    "Sleigh",
     "SmallTrailer",
-    "Snowball",
-    "Snowmobile",
-    "SpareTire",
-    "SparkleTurkey",
-    "Spork",
     "Stair1",
     "Stair2",
     "Stove",
@@ -194,21 +300,11 @@ autobuy:NewDropdown("gift:", "DropdownInf", {
     "StraightSwitchConveyorRight",
     "Table1",
     "Table2",
-    "TealBall",
     "TightTurnConveyor",
     "TightTurnConveyorSupports",
     "TiltConveyor",
-    "Toboggan",
     "Toilet",
-    "ToiletGold",
     "Trailer2",
-    "Turkey",
-    "Turkey2",
-    "Turkey3",
-    "Turkey4",
-    "Turkey5",
-    "Turkey6",
-    "TurkeyLeg",
     "UtilityTruck",
     "UtilityTruck2",
     "Wall1",
@@ -253,14 +349,21 @@ autobuy:NewDropdown("gift:", "DropdownInf", {
     "Wedge8",
     "Wedge8_Thin",
     "Wedge9",
-    "Wedge9_Thin"},function(currentOption)
+    "Wedge9_Thin",
+    "Wire",
+    "WireGreen",
+    "WireMagenta",
+    "WireRed",
+    "WireWhite",
+    "WireYellow",
+    "WoodChecker",
+    "WorkLight" }, function(currentOption)
     getgenv().Item = currentOption
 end)
-
-autobuy:NewSlider("Amount", "how many gifts you want to buy", 100, 0, function(s)
-    getgenv().Amount = s
+autobuy:NewSlider("amount", "how many items you want to buy", 100, 0, function(slidergifts)
+    getgenv().Amount = slidergifts
 end)
-autobuy:NewButton("Autobuy", "Autobuy what you selected", function()
+autobuy:NewButton("autobuy", "autobuy what you selected", function()
     local success, error = pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Aurora-2004/PuplicProjects/main/AutoBuy"))()
     end)
@@ -268,13 +371,11 @@ autobuy:NewButton("Autobuy", "Autobuy what you selected", function()
         warn("Error loading Autobuy script:", error)
     end
 end)
--- Misc Section
 local Tab = Window:NewTab("misc")
 local misc = Tab:NewSection("misc:")
-misc:NewButton("Butterhub", "Loads Butterhub", function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/Butterisgood/Butter/main/Root2.lua'))("")
+misc:NewKeybind("toggle gui", "select key to toggle gui", Enum.KeyCode.F, function()
+	Library:ToggleUI()
 end)
-
-misc:NewKeybind("Toggle GUI", "Choose the button to toggle the GUI", Enum.KeyCode.F, function()
-    Library:ToggleUI()
+misc:NewButton("butterhub", "opens butterhub", function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/Butterisgood/Butter/main/Root2.lua'))("")
 end)
