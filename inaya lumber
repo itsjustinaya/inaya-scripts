@@ -1,4 +1,4 @@
-
+-- library
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("lt2 script -made by inaya7252", "DarkTheme")
 -- clipboard system
@@ -18,17 +18,25 @@ end
 -- Credits Section
 local Tab = Window:NewTab("home")
 local home = Tab:NewSection("credits:")
+-- credit labels
 home:NewLabel("autobuy: made by silentben8x")
 home:NewLabel("lua teacher: zeen")
 home:NewLabel("autobuy gift script: made by inaya7252")
+-- copy socaill button
 local customPhrase = "https://discord.gg/68J3NmAJQK"
 home:NewButton("copy discord", "Copys the script server into your clipboard", function()
     CopyToClipboard(customPhrase)
     local customIconId = "rbxassetid://128737233"
     CreateNotification("Successfully copied inaya's Discord server link to your clipboard!", customIconId)
 end)
+-- serverhop (thnx apple for leakinng the loadstring xx)
+home:NewButton("serverhop", "serverhops you", function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/itsjustinaya/inaya-scripts/main/serverhop"))()
+end)
+-- player section
 local Tab = Window:NewTab("player")
 local player = Tab:NewSection("player:")
+-- jump power
 player:NewSlider("jump power", "adjust your characters jump power", 500, 50, function(jump)
     game.Players.LocalPlayer.Character.Humanoid.JumpPower = jump
 end)
@@ -55,7 +63,7 @@ end)
             print("Toggle Off")
         end
     end
-    
+-- infinity jump
     player:NewToggle("infinity jump", "jump high!", ToggleFunction)
 getgenv().NoClipEnabled = false
 
@@ -72,6 +80,7 @@ function NoClip(NoClipVal)
         end)
     end
 end
+-- noclip
 player:NewToggle("noclip", "toggle on and off noclip", function(enabled)
     getgenv().NoClipEnabled = enabled
     NoClip(enabled)
@@ -94,19 +103,85 @@ UserInputService.InputBegan:Connect(function(input)
         Teleport(Mouse.Hit.Position)
     end
 end)
+-- toggle light (player)
+local lightToggle = false
+
+local lightButton = player:NewToggle("toggle light", "activates light around you", function(state)
+    lightToggle = state
+    Light(lightToggle)
+end)
+
+function Light(Val)
+    if Val == false then
+        local pointLight = game.Players.LocalPlayer.Character.Head:FindFirstChild("PointLight")
+        if pointLight then
+            pointLight:Destroy()
+        end
+        return
+    end
+
+    local existingLight = game.Players.LocalPlayer.Character.Head:FindFirstChild("PointLight")
+    if not existingLight then
+        local pointLight = Instance.new("PointLight")
+        pointLight.Parent = game.Players.LocalPlayer.Character.Head
+        pointLight.Range = 100
+        pointLight.Brightness = 1
+        pointLight.Shadows = false
+    end
+end
 -- world section
 local Tab = Window:NewTab("world")
-local world = Tab:NewSection("world:")
-local walkOnWaterToggle = world:NewToggle("walk on water", "walk on water", function(swater)
-    WalkOnWater(swater)
-end)
-function WalkOnWater(swater)
+local world = Tab:NewSection("world config:")
+-- allways day/night toggle
+local AlwaysDayToggle = false
+local AlwaysNightToggle = false
+
+local function UpdateLighting()
+    if AlwaysDayToggle then
+        if AlwaysNightToggle then return end
+        game.Lighting.TimeOfDay = "12:00:00"
+        game.Lighting.SunPos.Value = 1
+
+        game:GetService("Lighting").Ambient = Color3.new(1, 1, 1)
+        game:GetService("Lighting").ColorShift_Bottom = Color3.new(1, 1, 1)
+        game:GetService("Lighting").ColorShift_Top = Color3.new(1, 1, 1)
+    end
+    if AlwaysNightToggle then
+        if AlwaysDayToggle then return end
+        game.Lighting.TimeOfDay = "00:00:00"
+        game.Lighting.SunPos.Value = -1
+    end
+end
+
+local function ToggleAlwaysDay(state)
+    AlwaysDayToggle = state
+    UpdateLighting()
+end
+
+local function ToggleAlwaysNight(state)
+    AlwaysNightToggle = state
+    UpdateLighting()
+end
+
+world:NewToggle("allways day", "turns on allways day", ToggleAlwaysDay)
+world:NewToggle("allways night", "turns on allways night", ToggleAlwaysNight)
+
+game:GetService("RunService").Heartbeat:Connect(UpdateLighting)
+-- water section label (world tab)
+world:NewLabel("water config:")
+-- walk on water
+local function WalkOnWater(swater)
     for i, v in next, game:GetService("Workspace").Water:GetChildren() do
         if v.Name == "Water" then
             v.CanCollide = swater
         end
     end
 end
+
+local walkOnWaterToggle = world:NewToggle("walk on water", "walk on water", function(swater)
+    WalkOnWater(swater)
+end)
+-- remove water
 local RemoveWaterToggle = world:NewToggle("remove water", "removes the water", function(Rwater)
     for _, v in ipairs(game:GetService("Workspace").Water:GetChildren()) do
         if v:IsA("Part") and v.Name == "Water" then
@@ -119,7 +194,210 @@ local RemoveWaterToggle = world:NewToggle("remove water", "removes the water", f
     end
 end)
 -- slot section
--- teleport section
+local Tab = Window:NewTab("slot")
+local slot = Tab:NewSection("land:")
+-- free land
+local function FreeLand()
+    for i, v in next, game:GetService("Workspace").Properties:GetChildren() do
+        if v:FindFirstChild("Owner") and v.Owner.Value == nil then
+            game:GetService("ReplicatedStorage").PropertyPurchasing.ClientPurchasedProperty:FireServer(v, v.OriginSquare.Position)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.OriginSquare.CFrame + Vector3.new(0, 2, 0)
+            break
+        end
+    end
+end
+
+slot:NewButton("free land", "claim free land", function()
+    FreeLand()
+end)
+-- max land
+function MaxLand()
+    for s,d in pairs(workspace.Properties:GetChildren()) do
+        if d:FindFirstChild("Owner") and d:FindFirstChild("OriginSquare") and d.Owner.Value == game.Players.LocalPlayer then
+            local PlotPos = d.OriginSquare.Position
+            for _, offset in ipairs({
+                Vector3.new(40, 0, 0),
+                Vector3.new(-40, 0, 0),
+                Vector3.new(0, 0, 40),
+                Vector3.new(0, 0, -40),
+                Vector3.new(40, 0, 40),
+                Vector3.new(40, 0, -40),
+                Vector3.new(-40, 0, 40),
+                Vector3.new(-40, 0, -40),
+                Vector3.new(80, 0, 0),
+                Vector3.new(-80, 0, 0),
+                Vector3.new(0, 0, 80),
+                Vector3.new(0, 0, -80),
+                Vector3.new(80, 0, 80),
+                Vector3.new(80, 0, -80),
+                Vector3.new(-80, 0, 80),
+                Vector3.new(-80, 0, -80),
+                Vector3.new(40, 0, 80),
+                Vector3.new(-40, 0, 80),
+                Vector3.new(80, 0, 40),
+                Vector3.new(80, 0, -40),
+                Vector3.new(-80, 0, 40),
+                Vector3.new(-80, 0, -40),
+                Vector3.new(40, 0, -80),
+                Vector3.new(-40, 0, -80),
+            }) do
+                game:GetService("ReplicatedStorage").PropertyPurchasing.ClientExpandedProperty:FireServer(d, CFrame.new(PlotPos + offset))
+            end
+        end
+    end
+end
+
+slot:NewButton("max land", "gives you max land", function()
+    MaxLand()
+end)
+-- wood section
+local Tab = Window:NewTab("wood")
+local wood = Tab:NewSection("wood:")
+-- bring all logs
+function BringAllLogs()
+    local OldPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    local logs = game:GetService("Workspace").LogModels:GetChildren()
+
+    if #logs == 0 then
+        local player = game.Players.LocalPlayer
+        local playerGui = player:WaitForChild("PlayerGui")
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Parent = playerGui
+        local roundGui = Instance.new("Frame")
+        roundGui.Size = UDim2.new(0, 200, 0, 100)
+        roundGui.Position = UDim2.new(1, -220, 0, 20)
+        roundGui.BackgroundColor3 = Color3.new(75, 151, 75)
+        roundGui.BorderSizePixel = 0
+        roundGui.Parent = screenGui
+        
+        local notificationLabel = Instance.new("TextLabel")
+        notificationLabel.Size = UDim2.new(1, 0, 1, 0)
+        notificationLabel.Text = "No logs found!"
+        notificationLabel.TextScaled = true
+        notificationLabel.TextColor3 = Color3.new(1, 1, 1)
+        notificationLabel.Parent = roundGui
+        
+        local function showNotification(message)
+            notificationLabel.Text = message
+            roundGui:TweenPosition(UDim2.new(1, -220, 0, 20), "Out", "Quad", 0.5, true)
+            wait(3)
+            roundGui:TweenPosition(UDim2.new(1, 20, 0, 20), "In", "Quad", 0.5, true)
+        end
+        
+        showNotification("no logs found!")
+        return
+    end
+
+    for i, v in ipairs(logs) do
+        if v:FindFirstChild("Owner") and v.Owner.Value == game.Players.LocalPlayer then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v:FindFirstChild("WoodSection").CFrame.p)
+            if not v.PrimaryPart then
+                v.PrimaryPart = v:FindFirstChild("WoodSection")
+            end
+            for j = 1, 50 do
+                game.ReplicatedStorage.Interaction.ClientIsDragging:FireServer(v)
+                v:SetPrimaryPartCFrame(OldPos)
+                task.wait()
+            end
+        end
+        task.wait()
+    end
+
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = OldPos
+end
+
+wood:NewButton("bring all logs", "brings all the logs that you chopped to you", BringAllLogs)
+-- sell logs
+function SellAllLogs()
+    local OldPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+    local logs = game:GetService("Workspace").LogModels:GetChildren()
+
+    if #logs == 0 then
+        print("No logs found!")
+        return
+    end
+
+    for i, v in ipairs(logs) do
+        if v:FindFirstChild("Owner") and v.Owner.Value == game.Players.LocalPlayer then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v:FindFirstChild("WoodSection").CFrame.p)
+            task.wait(0.3)
+            if not v.PrimaryPart then
+                v.PrimaryPart = v:FindFirstChild("WoodSection")
+            end
+            spawn(function()
+                for i = 1, 50 do
+                    game.ReplicatedStorage.Interaction.ClientIsDragging:FireServer(v)
+                    v:SetPrimaryPartCFrame(CFrame.new(314, -0.5, 86.822))
+                    task.wait()
+                end
+            end)
+        end
+        task.wait()
+    end
+
+    task.wait()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = OldPos
+end
+
+wood:NewButton("sell all logs", "sell all the logs that you chopped", SellAllLogs)
+
+-- label lonecave tree
+wood:NewLabel("Lone Cave tree:")
+-- view end tree
+function ViewEndTree(Val)
+    local treeFound = false
+    for _, region in pairs(game.Workspace:GetChildren()) do
+        if region.Name == "TreeRegion" then
+            for _, tree in pairs(region:GetChildren()) do
+                if tree:FindFirstChild("Owner") and tostring(tree.Owner.Value) == "nil" then
+                    if tree:FindFirstChild("TreeClass") and tostring(tree.TreeClass.Value) == "LoneCave" then
+                        treeFound = true
+                        if Val then
+                            game.Workspace.Camera.CameraSubject = tree:FindFirstChild("WoodSection")
+                        else
+                            game.Workspace.Camera.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if not treeFound then
+        local player = game.Players.LocalPlayer
+        local playerGui = player:WaitForChild("PlayerGui")
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Parent = playerGui
+        local roundGui = Instance.new("Frame")
+        roundGui.Size = UDim2.new(0, 200, 0, 100)
+        roundGui.Position = UDim2.new(1, -220, 0, 20)
+        roundGui.BackgroundColor3 = Color3.new(75, 151, 75)
+        roundGui.BorderSizePixel = 0
+        roundGui.Parent = screenGui
+        
+        local notificationLabel = Instance.new("TextLabel")
+        notificationLabel.Size = UDim2.new(1, 0, 1, 0)
+        notificationLabel.Text = "Hello, this is a notification!"
+        notificationLabel.TextScaled = true
+        notificationLabel.TextColor3 = Color3.new(1, 1, 1)
+        notificationLabel.Parent = roundGui
+        
+        local function showNotification(message)
+            notificationLabel.Text = message
+            roundGui:TweenPosition(UDim2.new(1, -220, 0, 20), "Out", "Quad", 0.5, true)
+            wait(3)
+            roundGui:TweenPosition(UDim2.new(1, 20, 0, 20), "In", "Quad", 0.5, true)
+        end
+        
+        showNotification("the tree isnt there")
+    end
+end
+
+wood:NewButton("view Lone Cave tree", "shows you the Lone Cave tree, if he isnt there a notification will pop up", function()
+    ViewEndTree(not ViewEndTreeStatus)
+    ViewEndTreeStatus = not ViewEndTreeStatus
+end)
+-- teleport to places
 local Tab = Window:NewTab("teleports")
 local teleport = Tab:NewSection("teleports:")
 local teleportLocations = {
@@ -162,6 +440,7 @@ local dropdown = teleport:NewDropdown("insert location:", "teleports you to the 
         end
     end
 end)
+-- teleport player
 local playerToTeleportTextBox = teleport:NewTextBox("insert Player:", "Teleport to the specified player", function(playerName)
     local player = game.Players:FindFirstChild(playerName)
     if player then
@@ -176,8 +455,10 @@ local playerToTeleportTextBox = teleport:NewTextBox("insert Player:", "Teleport 
         game.ReplicatedStorage.Notices.SendUserNotice:Fire("Player not found, please insert the players roblox name. NOT the display name.")
     end
 end)
+-- tab autobuy
 local Tab = Window:NewTab("autobuy")
 local autobuy = Tab:NewSection("autobuy:")
+-- autobuy items
 autobuy:NewDropdown("insert item:", "DropdownInf", {
     "2023CGift_Dice",
     "2023CGift_Green",
@@ -368,14 +649,78 @@ autobuy:NewButton("autobuy", "autobuy what you selected", function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Aurora-2004/PuplicProjects/main/AutoBuy"))()
     end)
     if not success then
-        warn("Error loading Autobuy script:", error)
+        local player = game.Players.LocalPlayer
+        local playerGui = player:WaitForChild("PlayerGui")
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Parent = playerGui
+        local roundGui = Instance.new("Frame")
+        roundGui.Size = UDim2.new(0, 200, 0, 100)
+        roundGui.Position = UDim2.new(1, -220, 0, 20)
+        roundGui.BackgroundColor3 = Color3.new(75, 151, 75)
+        roundGui.BorderSizePixel = 0
+        roundGui.Parent = screenGui
+        
+        local notificationLabel = Instance.new("TextLabel")
+        notificationLabel.Size = UDim2.new(1, 0, 1, 0)
+        notificationLabel.Text = "Hello, this is a notification!"
+        notificationLabel.TextScaled = true
+        notificationLabel.TextColor3 = Color3.new(1, 1, 1)
+        notificationLabel.Parent = roundGui
+        
+        local function showNotification(message)
+            notificationLabel.Text = message
+            roundGui:TweenPosition(UDim2.new(1, -220, 0, 20), "Out", "Quad", 0.5, true)
+            wait(3)
+            roundGui:TweenPosition(UDim2.new(1, 20, 0, 20), "In", "Quad", 0.5, true)
+        end
+        
+        showNotification("failed to autobuy, try again")
     end
 end)
 local Tab = Window:NewTab("misc")
-local misc = Tab:NewSection("misc:")
-misc:NewKeybind("toggle gui", "select key to toggle gui", Enum.KeyCode.F, function()
-	Library:ToggleUI()
+local misc = Tab:NewSection("game config:")
+local colorPickerActive = true
+
+local function ApplyGameMenuTheme(BGColor, TxtColor)
+    for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui:GetChildren()) do
+        if v.Name ~= "Chat" and v.Name ~= "TargetGui" and v.Name ~= "LoadingScreen" and v.Name ~= "Blueprints" then
+            for _, desc in pairs(v:GetDescendants()) do
+                if not desc:FindFirstChild("UICorner") then
+                    Instance.new("UICorner", desc)
+                end
+                if desc.Name == "DropShadow" then
+                    desc:Destroy()
+                end
+                if desc:IsA("TextButton") or desc:IsA("Frame") or desc:IsA("ScrollingFrame") then
+                    desc.BackgroundColor3 = BGColor
+                end
+                if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") then
+                    desc.TextColor3 = TxtColor
+                    desc.BackgroundColor3 = BGColor
+                    desc.Font = Enum.Font.GothamMedium
+                end
+            end
+        end
+    end
+end
+
+local function OnColorPicked(selectedColor)
+    if colorPickerActive then
+        local success, error = pcall(function()
+            ApplyGameMenuTheme(selectedColor, Color3.new(1, 1, 1))
+        end)
+
+        if not success then
+            warn("Error applying theme:", error)
+        end
+    end
+end
+
+local colorPicker = misc:NewColorPicker("color menu", "change the color of lt2 menu", Color3.fromRGB(0, 0, 0), OnColorPicked)
+misc:NewLabel("misc:")
+misc:NewButton("gui toggle button", "loads a toggle button to toggle the gui", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/Butter-Hub/mobile/main/toggle%20button'))("")
 end)
-misc:NewButton("butterhub", "opens butterhub", function()
-loadstring(game:HttpGet('https://raw.githubusercontent.com/Butterisgood/Butter/main/Root2.lua'))("")
+misc:NewButton("butterhub", "loads butterhub", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/Butterisgood/Butter/main/Root2.lua'))("")
 end)
