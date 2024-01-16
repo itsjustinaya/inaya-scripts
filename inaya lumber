@@ -167,6 +167,66 @@ world:NewToggle("allways day", "turns on allways day", ToggleAlwaysDay)
 world:NewToggle("allways night", "turns on allways night", ToggleAlwaysNight)
 
 game:GetService("RunService").Heartbeat:Connect(UpdateLighting)
+-- lower bridge (for player only)
+local isBridgeRaised = false
+
+local function BridgeDown(Bridge)
+    for i, v in next, game:GetService("Workspace").Bridge.VerticalLiftBridge.Lift:GetChildren() do
+        if not Bridge then
+            v.CFrame = v.CFrame + Vector3.new(0, 26, 0)
+        else
+            v.CFrame = v.CFrame - Vector3.new(0, 26, 0)
+        end
+    end
+end
+
+local ToggleButton = world:NewToggle("lower bridge", "lower the bridge only for yourself (other players wont see this)", function(state)
+    isBridgeRaised = state
+    BridgeDown(isBridgeRaised)
+end)
+-- realistic world
+world:NewButton("better world graphics", "make the graphics of the world more realistic", function()
+    local light = game.Lighting
+    light:ClearAllChildren()
+
+    local color = Instance.new("ColorCorrectionEffect", light)
+    local bloom = Instance.new("BloomEffect", light)
+    local sun = Instance.new("SunRaysEffect", light)
+    local blur = Instance.new("BlurEffect", light)
+
+    local config = {
+        ColorCorrection = true,
+        Sun = true,
+        Lighting = true,
+        BloomEffect = true,
+    }
+
+    color.Enabled = true
+    color.Contrast = 0.15
+    color.Brightness = 0.1
+    color.Saturation = 0.25
+    color.TintColor = Color3.fromRGB(255, 222, 211)
+
+    sun.Enabled = true
+    sun.Intensity = 0.2
+    sun.Spread = 1
+
+    bloom.Enabled = true
+    bloom.Intensity = 1
+    bloom.Size = 32
+    bloom.Threshold = 1
+
+    blur.Enabled = true
+    blur.Size = 3
+
+    light.Ambient = Color3.fromRGB(0, 0, 0)
+    light.ColorShift_Bottom = Color3.fromRGB(0, 0, 0)
+    light.ColorShift_Top = Color3.fromRGB(0, 0, 0)
+    light.ExposureCompensation = 0
+    light.GlobalShadows = true
+    light.OutdoorAmbient = Color3.fromRGB(112, 117, 128)
+    light.Outlines = false
+end)
 -- water section label (world tab)
 world:NewLabel("water config:")
 -- walk on water
@@ -190,6 +250,22 @@ local RemoveWaterToggle = world:NewToggle("remove water", "removes the water", f
             else
                 v.Transparency = 1
             end
+        end
+    end
+end)
+-- realistic water
+world:NewButton("realistic water", "adds realistic water but breaks the other water configs.", function()
+    for _, v in pairs(game.Workspace:GetDescendants()) do
+        if v:IsA("Part") and v.Name == "SeaSand" then
+            v.Size = Vector3.new(2048, 60, 2048)
+        end
+    end
+
+    for _, v in pairs(game.Workspace:GetDescendants()) do
+        if v:IsA("Part") and v.Name == "Water" then
+            v.Size = Vector3.new(20480, 6, 20080)
+            game.Workspace.Terrain:FillBlock(v.CFrame, v.Size, Enum.Material.Water)
+            v:Destroy()
         end
     end
 end)
@@ -397,9 +473,10 @@ wood:NewButton("view Lone Cave tree", "shows you the Lone Cave tree, if he isnt 
     ViewEndTree(not ViewEndTreeStatus)
     ViewEndTreeStatus = not ViewEndTreeStatus
 end)
--- teleport to places
+-- teleport section
 local Tab = Window:NewTab("teleports")
 local teleport = Tab:NewSection("teleports:")
+-- place teleport (player)
 local teleportLocations = {
     ["Wood Rus"] = Vector3.new(257, 3, 57),
     ["Land Store"] = Vector3.new(249, 3, -99),
@@ -441,6 +518,7 @@ local dropdown = teleport:NewDropdown("insert location:", "teleports you to the 
     end
 end)
 -- teleport player
+teleport:NewLabel("player teleport:")
 local playerToTeleportTextBox = teleport:NewTextBox("insert Player:", "Teleport to the specified player", function(playerName)
     local player = game.Players:FindFirstChild(playerName)
     if player then
@@ -455,18 +533,15 @@ local playerToTeleportTextBox = teleport:NewTextBox("insert Player:", "Teleport 
         game.ReplicatedStorage.Notices.SendUserNotice:Fire("Player not found, please insert the players roblox name. NOT the display name.")
     end
 end)
+-- place teleports (car) label
+-- coming soon
+-- place teleports (car)
+
 -- tab autobuy
 local Tab = Window:NewTab("autobuy")
 local autobuy = Tab:NewSection("autobuy:")
 -- autobuy items
 autobuy:NewDropdown("insert item:", "DropdownInf", {
-    "2023CGift_Dice",
-    "2023CGift_Green",
-    "2023CGift_LT2",
-    "2023CGift_Mint",
-    "2023CGift_Pixelated",
-    "2023CGift_Pixelatedo",
-    "2023CGift_Wobble",
     "ApplePie",
     "Axe1",
     "Axe2",
@@ -641,42 +716,19 @@ autobuy:NewDropdown("insert item:", "DropdownInf", {
     "WorkLight" }, function(currentOption)
     getgenv().Item = currentOption
 end)
-autobuy:NewSlider("amount", "how many items you want to buy", 100, 0, function(slidergifts)
+autobuy:NewSlider("amount", "how many items you want to buy", 100, 1, function(slidergifts)
     getgenv().Amount = slidergifts
 end)
 autobuy:NewButton("autobuy", "autobuy what you selected", function()
-    local success, error = pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Aurora-2004/PuplicProjects/main/AutoBuy"))()
-    end)
+    local success, error_message = pcall(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/itsjustinaya/inaya-scripts/main/autobuy%20code%20-not%20obfuscated.txt"))()
+end)
+    
     if not success then
-        local player = game.Players.LocalPlayer
-        local playerGui = player:WaitForChild("PlayerGui")
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Parent = playerGui
-        local roundGui = Instance.new("Frame")
-        roundGui.Size = UDim2.new(0, 200, 0, 100)
-        roundGui.Position = UDim2.new(1, -220, 0, 20)
-        roundGui.BackgroundColor3 = Color3.new(75, 151, 75)
-        roundGui.BorderSizePixel = 0
-        roundGui.Parent = screenGui
-        
-        local notificationLabel = Instance.new("TextLabel")
-        notificationLabel.Size = UDim2.new(1, 0, 1, 0)
-        notificationLabel.Text = "Hello, this is a notification!"
-        notificationLabel.TextScaled = true
-        notificationLabel.TextColor3 = Color3.new(1, 1, 1)
-        notificationLabel.Parent = roundGui
-        
-        local function showNotification(message)
-            notificationLabel.Text = message
-            roundGui:TweenPosition(UDim2.new(1, -220, 0, 20), "Out", "Quad", 0.5, true)
-            wait(3)
-            roundGui:TweenPosition(UDim2.new(1, 20, 0, 20), "In", "Quad", 0.5, true)
-        end
-        
-        showNotification("failed to autobuy, try again")
+        warn("Autobuy failed: " .. error_message)
     end
 end)
+
 local Tab = Window:NewTab("misc")
 local misc = Tab:NewSection("game config:")
 local colorPickerActive = true
@@ -718,9 +770,13 @@ end
 
 local colorPicker = misc:NewColorPicker("color menu", "change the color of lt2 menu", Color3.fromRGB(0, 0, 0), OnColorPicked)
 misc:NewLabel("misc:")
+misc:NewButton("butterhub", "loads butterhub", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/Butterisgood/Butter/main/Root2.lua'))("")
+end)
+misc:NewLabel("toggle gui:")
 misc:NewButton("gui toggle button", "loads a toggle button to toggle the gui", function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/Butter-Hub/mobile/main/toggle%20button'))("")
 end)
-misc:NewButton("butterhub", "loads butterhub", function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/Butterisgood/Butter/main/Root2.lua'))("")
+misc:NewKeybind("toggle gui bind", "toggle gui keybind (toggles the gui)", Enum.KeyCode.F, function()
+	Library:ToggleUI()
 end)
