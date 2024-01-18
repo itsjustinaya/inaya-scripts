@@ -36,6 +36,22 @@ end)
 -- player section
 local Tab = Window:NewTab("player")
 local player = Tab:NewSection("player:")
+-- player speed
+getgenv().Speed = 16
+
+-- Function to handle walk speed changes
+function Walkspeed()
+    game.Players.LocalPlayer.Character.Humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = getgenv().Speed
+    end)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = getgenv().Speed
+end
+
+-- Slider for walk speed
+player:NewSlider("walkspeed", "change your walkspeed", 500, 16, function(value)
+    getgenv().Speed = value
+    Walkspeed()
+end)
 -- jump power
 player:NewSlider("jump power", "adjust your characters jump power", 500, 50, function(jump)
     game.Players.LocalPlayer.Character.Humanoid.JumpPower = jump
@@ -324,8 +340,42 @@ function MaxLand()
 end
 
 slot:NewButton("max land", "gives you max land", function()
-    MaxLand()
+MaxLand()
 end)
+-- axes config label
+slot:NewLabel("axes config:")
+-- store axes
+local toggleStatus = false
+
+local function StoreAxes()
+    Amount = 0
+    for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+        if tool:IsA("Tool") and tool.Name ~= "BlueprintTool" then
+            tool.Parent = game.Players.LocalPlayer
+            Amount = Amount + 1
+        end
+    end
+end
+
+local function RestoreAxes()
+    Amount = 0
+    for _, tool in pairs(game.Players.LocalPlayer:GetChildren()) do
+        if tool:IsA("Tool") and tool.Name ~= "BlueprintTool" then
+            tool.Parent = game.Players.LocalPlayer.Backpack
+            Amount = Amount + 1
+        end
+    end
+end
+
+slot:NewToggle("store axes", "stores your axes for to get it back you simply turn it off", function(state)
+    toggleStatus = state
+    if toggleStatus then
+        StoreAxes()
+    else
+        RestoreAxes()
+    end
+end)
+
 -- wood section
 local Tab = Window:NewTab("wood")
 local wood = Tab:NewSection("wood:")
@@ -475,7 +525,7 @@ wood:NewButton("view Lone Cave tree", "shows you the Lone Cave tree, if he isnt 
 end)
 -- teleport section
 local Tab = Window:NewTab("teleports")
-local teleport = Tab:NewSection("teleports:")
+local teleport = Tab:NewSection("world teleport:")
 -- place teleport (player)
 local teleportLocations = {
     ["Wood Rus"] = Vector3.new(257, 3, 57),
@@ -517,28 +567,42 @@ local dropdown = teleport:NewDropdown("insert location:", "teleports you to the 
         end
     end
 end)
--- teleport player
+-- organize label
 teleport:NewLabel("player teleport:")
-local playerToTeleportTextBox = teleport:NewTextBox("insert Player:", "Teleport to the specified player", function(playerName)
-    local player = game.Players:FindFirstChild(playerName)
-    if player then
-        local character = player.Character
-        if character then
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart then
-                game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(humanoidRootPart.Position))
-            end
-        end
-    else
-        game.ReplicatedStorage.Notices.SendUserNotice:Fire("Player not found, please insert the players roblox name. NOT the display name.")
+-- teleport player
+local playerList = {}
+
+local function updatePlayerList()
+    playerList = {}
+    for _, player in pairs(game.Players:GetPlayers()) do
+        table.insert(playerList, player.Name)
+    end
+end
+
+local dropdown = teleport:NewDropdown("select player:", "click on a player to teleport there", playerList, function(currentOption)
+    print("Selected player: " .. currentOption)
+
+    local selectedPlayer = game.Players:FindFirstChild(currentOption)
+    if selectedPlayer then
+        game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(selectedPlayer.Character.HumanoidRootPart.CFrame)
     end
 end)
--- place teleports (car) label
--- coming soon
--- place teleports (car)
 
+game.Players.PlayerAdded:Connect(function(player)
+    updatePlayerList()
+    dropdown:Refresh(playerList)
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    updatePlayerList()
+    dropdown:Refresh(playerList)
+end)
+
+updatePlayerList()
+dropdown:Refresh(playerList)
 -- tab autobuy
 local Tab = Window:NewTab("autobuy")
+-- autobuy section
 local autobuy = Tab:NewSection("autobuy:")
 -- autobuy items
 autobuy:NewDropdown("insert item:", "DropdownInf", {
@@ -722,15 +786,41 @@ end)
 autobuy:NewButton("autobuy", "autobuy what you selected", function()
     local success, error_message = pcall(function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/itsjustinaya/inaya-scripts/main/autobuy%20code%20-not%20obfuscated.txt"))()
-end)
-    
+end)    
     if not success then
         warn("Autobuy failed: " .. error_message)
     end
 end)
-
+-- troll tab
+local Tab = Window:NewTab("troll")
+-- trol section
+local trol = Tab:NewSection("troll:")
+-- clear shop items
+function ClearShopItems()
+    for i,v in next, game:GetService("Workspace").Stores:GetChildren() do
+        if v.Name == "ShopItems" then
+            for i,v in next, v:GetChildren() do
+                if v:FindFirstChild("Owner") and v.Owner.Value == nil then
+                    spawn(function()
+                        for i = 1,10 do
+                            game.ReplicatedStorage.Interaction.ClientIsDragging:FireServer(v)
+                            v.Main.CFrame = v.Main.CFrame + Vector3.new(0,0,25)
+                            task.wait()
+                        end
+                    end)
+                end
+            end
+        end
+    end
+end
+trol:NewButton("clear shop items", "clears the shop items it isnt undoable", function()
+ClearShopItems()
+end)
+-- misc tab
 local Tab = Window:NewTab("misc")
+-- misc section
 local misc = Tab:NewSection("game config:")
+-- colorpicker
 local colorPickerActive = true
 
 local function ApplyGameMenuTheme(BGColor, TxtColor)
@@ -769,14 +859,85 @@ local function OnColorPicked(selectedColor)
 end
 
 local colorPicker = misc:NewColorPicker("color menu", "change the color of lt2 menu", Color3.fromRGB(0, 0, 0), OnColorPicked)
+-- misc label
 misc:NewLabel("misc:")
+-- load butter
 misc:NewButton("butterhub", "loads butterhub", function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/Butterisgood/Butter/main/Root2.lua'))("")
 end)
+-- toggle gui label
 misc:NewLabel("toggle gui:")
+-- toggle gui button
 misc:NewButton("gui toggle button", "loads a toggle button to toggle the gui", function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/Butter-Hub/mobile/main/toggle%20button'))("")
 end)
+-- toggle gui bind
 misc:NewKeybind("toggle gui bind", "toggle gui keybind (toggles the gui)", Enum.KeyCode.F, function()
 	Library:ToggleUI()
 end)
+misc:NewLabel("game info:")
+local playerCountLabel = misc:NewLabel("player count: 0", "shows how many players are in the server you currently in")
+
+local function updatePlayerCount()
+    local playerCount = #game.Players:GetPlayers()
+    playerCountLabel:UpdateLabel("player count: " .. playerCount)
+end
+
+updatePlayerCount()
+
+game.Players.PlayerAdded:Connect(function()
+    updatePlayerCount()
+end)
+
+game.Players.PlayerRemoving:Connect(function()
+    updatePlayerCount()
+end)
+
+-- not in gui codes
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- player join/leave detector
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+local function SendNotification(title,text,duration,...)
+    game.StarterGui:SetCore("SendNotification", {
+      Title = title;
+      Text = text;
+      Icon = "";
+      Duration = duration;
+    })
+  end
+
+game.Players.ChildAdded:Connect(function(player)
+if not pcall (function()
+SendNotification("Player JOINED",""..player.Name.." has JOINED the game",5 )
+end) then
+print ("Error")
+end
+end)
+
+game.Players.ChildRemoved:Connect(function(player)
+if not pcall (function()
+SendNotification("Player LEFT",""..player.Name.." has LEFT the game",4.4 )
+end) then
+print ("Error")
+end
+end)
+    
+SendNotification("detector","join/leave detector has been enabled",2)
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- anti afk (thnx apple u nigga)
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+function AntiAFK()
+    game:GetService("Players").LocalPlayer.Idled:Connect(function()
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, "w", false, game)
+        wait()
+        game:GetService("VirtualInputManager"):SendKeyEvent(false, "w", false, game)
+    end)
+end
+
+AntiAFK()
+
+wait(10)
+
+SendNotification("Anti AFK", "Just letting you know anti AFK is automatically turned on!", 3)
+
+print("Anti AFK is turned on forever.")
